@@ -1,2 +1,0 @@
-# coderfire.com
-CoderFire website
