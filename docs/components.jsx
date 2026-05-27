@@ -48,8 +48,27 @@ function PixelButton({ children, onClick, variant = "spark" }) {
   return <button className={`cf-pixel-btn cf-pixel-btn-${variant}`} onClick={onClick}>{children}</button>;
 }
 
+// ---------- Lang toggle ----------
+function LangToggle({ lang, onLangChange }) {
+  return (
+    <div className="cf-lang-toggle" role="group" aria-label="Language">
+      <button
+        className={`cf-lang-btn${lang === 'pt' ? ' cf-lang-btn-active' : ''}`}
+        onClick={() => onLangChange('pt')}
+        aria-pressed={lang === 'pt'}
+      >PT</button>
+      <button
+        className={`cf-lang-btn${lang === 'en' ? ' cf-lang-btn-active' : ''}`}
+        onClick={() => onLangChange('en')}
+        aria-pressed={lang === 'en'}
+      >EN</button>
+    </div>
+  );
+}
+
 // ---------- Nav ----------
-function Nav({ onCta }) {
+function Nav({ onCta, lang, onLangChange }) {
+  const t = useT();
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -64,15 +83,16 @@ function Nav({ onCta }) {
           <span className="cf-nav-wordmark">CODER<span style={{color:'var(--cf-blaze)'}}>FIRE</span><span className="cf-nav-tld">.com.br</span></span>
         </a>
         <nav className="cf-nav-links">
-          <a href="#services">Services</a>
-          <a href="#capabilities">Capabilities</a>
-          <a href="#work">Work</a>
-          <a href="#industries">Industries</a>
-          <a href="#team">Team</a>
+          <a href="#services">{t.nav.services}</a>
+          <a href="#capabilities">{t.nav.capabilities}</a>
+          <a href="#work">{t.nav.work}</a>
+          <a href="#industries">{t.nav.industries}</a>
+          <a href="#team">{t.nav.team}</a>
         </nav>
         <div className="cf-nav-actions">
+          <LangToggle lang={lang} onLangChange={onLangChange} />
           <a className="cf-nav-link-quiet" href="mailto:rafael@coderfire.com.br">rafael@coderfire.com.br</a>
-          <Button variant="primary" size="sm" onClick={onCta}>Book a call</Button>
+          <Button variant="primary" size="sm" onClick={onCta}>{t.nav.bookCall}</Button>
         </div>
       </div>
     </header>
@@ -81,6 +101,7 @@ function Nav({ onCta }) {
 
 // ---------- Footer ----------
 function Footer() {
+  const t = useT();
   return (
     <footer className="cf-footer">
       <div className="cf-footer-inner">
@@ -88,26 +109,26 @@ function Footer() {
           <Logo size={36} />
           <div>
             <div className="cf-footer-wordmark">CODER<span style={{color:'var(--cf-blaze)'}}>FIRE</span></div>
-            <div className="cf-footer-tag">A Brazilian software firm.<br/>Forged with fire · shipped worldwide.<br/>Senior craftsmanship since 2006.</div>
+            <div className="cf-footer-tag" style={{whiteSpace:'pre-line'}}>{t.footer.tagline}</div>
           </div>
         </div>
         <div className="cf-footer-cols">
           <div>
-            <div className="cf-footer-col-title">Hire</div>
-            <a href="#services">Product delivery</a>
-            <a href="#services">Architecture &amp; consulting</a>
-            <a href="#services">CV / LLM integration</a>
+            <div className="cf-footer-col-title">{t.footer.hire}</div>
+            <a href="#services">{t.footer.productDelivery}</a>
+            <a href="#services">{t.footer.archConsulting}</a>
+            <a href="#services">{t.footer.cvLlm}</a>
           </div>
           <div>
-            <div className="cf-footer-col-title">Work</div>
-            <a href="#work">Case studies</a>
-            <a href="#industries">Industries</a>
-            <a href="#capabilities">Capabilities</a>
+            <div className="cf-footer-col-title">{t.footer.work}</div>
+            <a href="#work">{t.footer.caseStudies}</a>
+            <a href="#industries">{t.footer.industries}</a>
+            <a href="#capabilities">{t.footer.capabilities}</a>
           </div>
           <div>
-            <div className="cf-footer-col-title">Company</div>
-            <a href="#team">Team</a>
-            <a href="mailto:rafael@coderfire.com.br">Contact</a>
+            <div className="cf-footer-col-title">{t.footer.company}</div>
+            <a href="#team">{t.footer.team}</a>
+            <a href="mailto:rafael@coderfire.com.br">{t.footer.contact}</a>
             <a href="https://linkedin.com/in/basask/" target="_blank" rel="noreferrer">LinkedIn</a>
           </div>
         </div>
@@ -118,24 +139,19 @@ function Footer() {
         </div>
       </div>
       <div className="cf-footer-bottom">
-        <span><Icon.MapPin size={11}/> &nbsp;Brazil · Remote-first · UTC-3 (BRT)</span>
+        <span><Icon.MapPin size={11}/> &nbsp;{t.footer.location}</span>
         <span className="cf-footer-version">CoderFire · v2026.05</span>
       </div>
     </footer>
   );
 }
 
-// ---------- Modal (booking) — Formspree (same /f/{id} API as @formspree/react useForm) ----------
+// ---------- Modal (booking) — Formspree ----------
 const BOOKING_FIELD_IDS = { email: 'cf-book-email', need: 'cf-book-need', message: 'cf-book-message' };
 const BOOKING_FIELD_ORDER = ['email', 'need', 'message'];
-const BOOKING_FIELD_LABELS = {
-  email: 'Email',
-  need: 'What you need',
-  message: 'What hurts?',
-};
 
-function formatFormspreeFieldError(field, message) {
-  const label = BOOKING_FIELD_LABELS[field] || field;
+function formatFormspreeFieldError(field, message, labels) {
+  const label = (labels && labels[field]) || field;
   const text = (message || '').trim();
   if (!text) return `${label} is invalid.`;
   if (/^is required$/i.test(text)) return `${label} is required.`;
@@ -143,13 +159,13 @@ function formatFormspreeFieldError(field, message) {
   return text.endsWith('.') ? text : `${text}.`;
 }
 
-function parseFormspreeErrors(body) {
+function parseFormspreeErrors(body, labels, genericError) {
   const fieldErrors = {};
   let formError = null;
   if (Array.isArray(body.errors) && body.errors.length) {
     for (const item of body.errors) {
       if (item.field) {
-        fieldErrors[item.field] = formatFormspreeFieldError(item.field, item.message);
+        fieldErrors[item.field] = formatFormspreeFieldError(item.field, item.message, labels);
       } else if (item.message) {
         formError = item.message;
       }
@@ -159,12 +175,13 @@ function parseFormspreeErrors(body) {
     formError = body.error;
   }
   if (!formError && !Object.keys(fieldErrors).length) {
-    formError = typeof body.error === 'string' ? body.error : 'Could not send your message. Please try again.';
+    formError = typeof body.error === 'string' ? body.error : genericError;
   }
   return { fieldErrors, formError };
 }
 
 function BookingModal({ open, onClose }) {
+  const t = useT();
   const [succeeded, setSucceeded] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
@@ -214,7 +231,7 @@ function BookingModal({ open, onClose }) {
         form.reset();
         return;
       }
-      const { fieldErrors: nextFieldErrors, formError: nextFormError } = parseFormspreeErrors(body);
+      const { fieldErrors: nextFieldErrors, formError: nextFormError } = parseFormspreeErrors(body, t.modal.labels, t.modal.genericError);
       setFieldErrors(nextFieldErrors);
       setFormError(nextFormError);
       const firstField = BOOKING_FIELD_ORDER.find(f => nextFieldErrors[f]);
@@ -223,7 +240,7 @@ function BookingModal({ open, onClose }) {
         requestAnimationFrame(() => document.getElementById(elId)?.focus());
       }
     } catch (e) {
-      setFormError(e.message || 'Network error. Try again.');
+      setFormError(e.message || t.modal.genericError);
       setFieldErrors({});
     } finally {
       setSubmitting(false);
@@ -238,24 +255,24 @@ function BookingModal({ open, onClose }) {
         {succeeded ? (
           <div className="cf-modal-success">
             <Logo size={48} />
-            <h3 className="cf-modal-title">Thank you. We'll be in touch.</h3>
-            <p className="cf-modal-sub">Expect a calendar link within one business day (BRT).</p>
-            <Button variant="secondary" onClick={onClose}>Close</Button>
+            <h3 className="cf-modal-title">{t.modal.successTitle}</h3>
+            <p className="cf-modal-sub">{t.modal.successSub}</p>
+            <Button variant="secondary" onClick={onClose}>{t.modal.close}</Button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="cf-form" noValidate>
-            <Eyebrow>BOOK A CALL · 30 MIN · NO PITCH DECK</Eyebrow>
-            <h3 className="cf-modal-title">Tell us what&rsquo;s on fire.</h3>
-            <p className="cf-modal-sub">We&rsquo;ll reply within one business day. If CoderFire isn&rsquo;t the right fit, we&rsquo;ll say so on the call.</p>
+          <form key={t.lang} onSubmit={handleSubmit} className="cf-form" noValidate>
+            <Eyebrow>{t.modal.eyebrow}</Eyebrow>
+            <h3 className="cf-modal-title">{t.modal.title}</h3>
+            <p className="cf-modal-sub">{t.modal.sub}</p>
             <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" style={{ position: 'absolute', left: '-9999px' }} aria-hidden="true" />
             <div className={`cf-field${fieldErrors.email ? ' cf-field-invalid' : ''}`}>
-              <label htmlFor="cf-book-email">Email</label>
+              <label htmlFor="cf-book-email">{t.modal.labels.email}</label>
               <input
                 id="cf-book-email"
                 name="email"
                 type="email"
                 required
-                placeholder="you@company.com"
+                placeholder={t.modal.placeholders.email}
                 aria-invalid={fieldErrors.email ? 'true' : undefined}
                 aria-describedby={fieldErrors.email ? 'cf-book-email-error' : undefined}
                 onChange={() => clearFieldError('email')}
@@ -265,32 +282,30 @@ function BookingModal({ open, onClose }) {
               ) : null}
             </div>
             <div className={`cf-field${fieldErrors.need ? ' cf-field-invalid' : ''}`}>
-              <label htmlFor="cf-book-need">What you need</label>
+              <label htmlFor="cf-book-need">{t.modal.labels.need}</label>
               <select
+                key={t.lang}
                 id="cf-book-need"
                 name="need"
-                defaultValue="Product delivery (fixed scope)"
+                defaultValue={t.modal.options[0]}
                 aria-invalid={fieldErrors.need ? 'true' : undefined}
                 aria-describedby={fieldErrors.need ? 'cf-book-need-error' : undefined}
                 onChange={() => clearFieldError('need')}
               >
-                <option>Product delivery (fixed scope)</option>
-                <option>Architecture / consulting</option>
-                <option>Computer vision / LLM integration</option>
-                <option>Fractional CTO / advisory</option>
+                {t.modal.options.map(o => <option key={o}>{o}</option>)}
               </select>
               {fieldErrors.need ? (
                 <p id="cf-book-need-error" className="cf-field-error" role="alert">{fieldErrors.need}</p>
               ) : null}
             </div>
             <div className={`cf-field${fieldErrors.message ? ' cf-field-invalid' : ''}`}>
-              <label htmlFor="cf-book-message">What hurts?</label>
+              <label htmlFor="cf-book-message">{t.modal.labels.message}</label>
               <textarea
                 id="cf-book-message"
                 name="message"
                 rows="3"
                 required
-                placeholder="e.g. We need a computer-vision pipeline for defect inspection on our packaging line."
+                placeholder={t.modal.placeholders.message}
                 aria-invalid={fieldErrors.message ? 'true' : undefined}
                 aria-describedby={fieldErrors.message ? 'cf-book-message-error' : undefined}
                 onChange={() => clearFieldError('message')}
@@ -301,7 +316,7 @@ function BookingModal({ open, onClose }) {
             </div>
             {formError ? <p className="cf-modal-error" role="alert">{formError}</p> : null}
             <Button variant="primary" size="lg" glow type="submit" disabled={submitting} icon={<Icon.ArrowRight size={18}/>}>
-              {submitting ? 'Sending…' : 'Send'}
+              {submitting ? t.modal.submitting : t.modal.send}
             </Button>
           </form>
         )}
@@ -311,6 +326,6 @@ function BookingModal({ open, onClose }) {
 }
 
 Object.assign(window, {
-  Icon, Logo, Eyebrow, Button, PixelButton,
+  Icon, Logo, Eyebrow, Button, PixelButton, LangToggle,
   Nav, Footer, BookingModal,
 });

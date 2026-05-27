@@ -6,16 +6,8 @@ const { useState: _useState, useEffect: _useEffect, useRef: _useRef } = React;
 
 // ---------- HERO ----------
 function Hero({ onCta }) {
-  // Animated terminal lines (typed in on load)
-  const lines = [
-    { p: '~/coderfire', c: 'whoami', d: 'software engineering firm · Brazil' },
-    { p: '~/coderfire', c: 'cat services.toml', d: null },
-    { p: null, c: null, d: '[delivery]    fixed_scope = true   demo = "biweekly"' },
-    { p: null, c: null, d: '[consulting]  architecture = true   review = true' },
-    { p: null, c: null, d: '[ai_iot]      cv = true   llm_integration = true' },
-    { p: '~/coderfire', c: 'history --since 2006 | wc -l', d: '180+ projects shipped' },
-    { p: '~/coderfire', c: 'status', d: 'remote · async · BRT ±5h' },
-  ];
+  const t = useT();
+  const { terminal, stats } = t.hero;
 
   return (
     <section className="cf-hero" id="top">
@@ -23,22 +15,19 @@ function Hero({ onCta }) {
       <div className="cf-hero-bg-grid"></div>
       <div className="cf-hero-inner">
         <div className="cf-hero-text">
-          <Eyebrow>SOFTWARE ENGINEERING FIRM · SINCE 2006 · BRAZIL</Eyebrow>
+          <Eyebrow>{t.hero.eyebrow}</Eyebrow>
           <h1 className="cf-hero-title">
-            Production software,<br/>
-            <span className="cf-hero-title-accent">forged with fire.</span>
+            {t.hero.title1}<br/>
+            <span className="cf-hero-title-accent">{t.hero.title2}</span>
           </h1>
-          <p className="cf-hero-sub">
-            A Brazilian software firm building, shipping, and consulting on web platforms,
-            computer vision, and LLM-powered products. Remote-first. Senior craftsmanship.
-          </p>
+          <p className="cf-hero-sub">{t.hero.sub}</p>
           <div className="cf-hero-cta">
-            <Button variant="primary" size="lg" glow onClick={onCta} icon={<Icon.ArrowRight size={18}/>}>Book a call</Button>
-            <Button variant="ghost" size="lg" as="a" href="#work">See case studies</Button>
+            <Button variant="primary" size="lg" glow onClick={onCta} icon={<Icon.ArrowRight size={18}/>}>{t.hero.cta}</Button>
+            <Button variant="ghost" size="lg" as="a" href="#work">{t.hero.ctaSecondary}</Button>
           </div>
           <div className="cf-hero-meta">
             <span className="cf-hero-meta-dot" />
-            <span>Currently accepting new engagements · reply within <strong>1&nbsp;business&nbsp;day</strong></span>
+            <span>{t.hero.metaPrefix} <strong>{t.hero.metaStrong}</strong></span>
           </div>
         </div>
 
@@ -47,10 +36,10 @@ function Hero({ onCta }) {
             <span className="cf-term-dot" style={{background:'var(--cf-magma)'}}></span>
             <span className="cf-term-dot" style={{background:'var(--cf-flare)'}}></span>
             <span className="cf-term-dot" style={{background:'var(--cf-success, #28a745)'}}></span>
-            <span className="cf-term-title">coderfire — zsh — 80×24</span>
+            <span className="cf-term-title">{terminal.title}</span>
           </div>
           <div className="cf-term-body">
-            {lines.map((l, i) => (
+            {terminal.lines.map((l, i) => (
               <div className="cf-term-line" key={i} style={{ animationDelay: `${i * 220}ms` }}>
                 {l.p && <span className="cf-term-prompt">{l.p} <span className="cf-term-tick">$</span></span>}
                 {l.c && <span className="cf-term-cmd">{l.c}</span>}
@@ -66,10 +55,12 @@ function Hero({ onCta }) {
       </div>
 
       <div className="cf-hero-stats">
-        <div><span className="cf-stat-n">18+</span><span className="cf-stat-l">years shipping production code</span></div>
-        <div><span className="cf-stat-n">8</span><span className="cf-stat-l">industries served</span></div>
-        <div><span className="cf-stat-n">3</span><span className="cf-stat-l">languages PT · EN · ES</span></div>
-        <div><span className="cf-stat-n">100%</span><span className="cf-stat-l">remote · async-friendly</span></div>
+        {stats.map(s => (
+          <div key={s.n + s.l}>
+            <span className="cf-stat-n">{s.n}</span>
+            <span className="cf-stat-l">{s.l}</span>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -77,10 +68,11 @@ function Hero({ onCta }) {
 
 // ---------- LOGO STRIP ----------
 function LogoStrip() {
+  const t = useT();
   const logos = ["Pinterest", "Accenture", "BairesDev", "Pollux", "Refatore"];
   return (
     <section className="cf-strip">
-      <div className="cf-strip-label">WHERE CODERFIRE HAS SHIPPED</div>
+      <div className="cf-strip-label">{t.logoStrip.label}</div>
       <div className="cf-strip-logos">
         {logos.map(l => <span key={l} className="cf-strip-logo">{l}</span>)}
       </div>
@@ -89,10 +81,10 @@ function LogoStrip() {
 }
 
 // ---------- SERVICES ----------
-function ServiceCard({ tag, title, desc, features, popular }) {
+function ServiceCard({ tag, title, desc, features, popular, flag }) {
   return (
     <div className={`cf-service ${popular ? 'cf-service-hot' : ''}`}>
-      {popular && <div className="cf-service-flag">CORE PRACTICE</div>}
+      {popular && <div className="cf-service-flag">{flag}</div>}
       <Eyebrow>{tag}</Eyebrow>
       <h3 className="cf-service-title">{title}</h3>
       <p className="cf-service-desc">{desc}</p>
@@ -104,35 +96,30 @@ function ServiceCard({ tag, title, desc, features, popular }) {
 }
 
 function Services({ onCta }) {
+  const t = useT();
   return (
     <section id="services" className="cf-section">
-      <Eyebrow>SERVICES · 03</Eyebrow>
-      <h2 className="cf-section-title">Two ways CoderFire ships.</h2>
-      <p className="cf-section-sub">Pick the engagement that matches the bottleneck. We&rsquo;ll tell you on the scoping call if we&rsquo;re not the right fit — every engagement priced after a brief scope.</p>
+      <Eyebrow>{t.services.eyebrow}</Eyebrow>
+      <h2 className="cf-section-title">{t.services.title}</h2>
+      <p className="cf-section-sub">{t.services.sub}</p>
       <div className="cf-service-grid">
-        <ServiceCard
-          tag="01 · PRODUCT DELIVERY"
-          title="Build &amp; ship, end-to-end"
-          desc="Fixed-scope delivery: we architect, build, and ship — then hand it off with docs, tests, and a warranty period. Greenfield products or features inside an existing platform."
-          features={["Scoped in 1 week","Bi-weekly demos","Full handoff package","Post-launch warranty","Source on your VCS"]}
-          popular
-        />
-        <ServiceCard
-          tag="02 · CONSULTING"
-          title="Architecture &amp; technical leadership"
-          desc="Drop us into your roadmap before the code lands. Architecture reviews, technical due diligence, code audits, and fractional-CTO engagements — grounded in 18 years of shipping."
-          features={["Architecture deep-dive","Code & security review","Hiring rubrics","Fractional CTO","Async-friendly cadence"]}
-        />
-        {/* <ServiceCard
-          tag="03 · AI · CV · LLM"
-          title="Computer vision &amp; LLM integration"
-          desc="Real-time defect inspection, OCR, vision pipelines on edge or cloud. Plus LLM integration into your product — pick the model, we bring the pipeline, the guardrails, and the evals."
-          features={["Bring your own LLM · OpenAI · Anthropic · self-hosted","RAG, agents, structured output","OpenCV · edge inference","Eval & observability","On-prem or AWS"]}
-        /> */}
+        {t.services.cards.map(card => (
+          <ServiceCard
+            key={card.tag}
+            tag={card.tag}
+            title={card.title}
+            desc={card.desc}
+            features={card.features}
+            popular={card.popular}
+            flag={card.flag}
+          />
+        ))}
       </div>
       <div className="cf-services-foot">
-        <span>Not sure which fits?</span>
-        <a className="cf-link-arrow" href="#" onClick={(e)=>{e.preventDefault(); onCta();}}>Book a 30-min scoping call <Icon.ArrowRight size={14}/></a>
+        <span>{t.services.notSure}</span>
+        <a className="cf-link-arrow" href="#" onClick={(e)=>{e.preventDefault(); onCta();}}>
+          {t.services.ctaLink} <Icon.ArrowRight size={14}/>
+        </a>
       </div>
     </section>
   );
@@ -140,68 +127,29 @@ function Services({ onCta }) {
 
 // ---------- CAPABILITIES ----------
 function Capabilities() {
-  const groups = [
-    {
-      icon: <Icon.Layers size={18}/>,
-      title: "Full-stack product",
-      stack: "Python · JavaScript · TypeScript · React · Django · Flask",
-      blurb: "Web and SaaS, front to back. Greenfield builds, rescue missions, and the boring legacy work other shops won't touch.",
-    },
-    {
-      icon: <Icon.Brain size={18}/>,
-      title: "LLM integration",
-      stack: "OpenAI · Anthropic · self-hosted · RAG · evals",
-      blurb: "Integrate the model of your choice into your product. We bring the retrieval, the structured output, the guardrails, and the evals — you keep your data.",
-    },
-    {
-      icon: <Icon.Eye size={18}/>,
-      title: "Computer vision",
-      stack: "OpenCV · Edge inference",
-      blurb: "Quality inspection on production lines. Real-time defect detection. Shipped to automotive and consumer-goods plants.",
-    },
-    {
-      icon: <Icon.Cpu size={18}/>,
-      title: "IoT & Industry 4.0",
-      stack: "ZeroMQ · RabbitMQ · MQTT · Edge gateways",
-      blurb: "Telemetry, line-side dashboards. Took vision models out of notebooks and onto the shop floor.",
-    },
-    {
-      icon: <Icon.Database size={18}/>,
-      title: "Data engineering",
-      stack: "SQL · SparkSQL · AirFlow",
-      blurb: "Pipelines, scorecards, and quality-health dashboards. Built the analytics platform to power your product decisions",
-    },
-    {
-      icon: <Icon.Smartphone size={18}/>,
-      title: "Mobile · embedded",
-      stack: "C/C++ · ReactNative",
-      blurb: "Mobile Apps and embedded gaming systems",
-    },
-    {
-      icon: <Icon.Cloud size={18}/>,
-      title: "DevOps · cloud",
-      stack: "Linux · AWS · Docker · CI/CD",
-      blurb: "From bare-metal Linux configuration up. Certified at 4linux. We own deploys end-to-end.",
-    },
-    {
-      icon: <Icon.Layers size={18}/>,
-      title: "Legacy & rescue",
-      stack: "C/C++ · Qt · 18 yrs of CVS history",
-      blurb: "We don&rsquo;t flinch at old stacks. Inheriting a 2008 codebase is most weeks for us.",
-    },
+  const t = useT();
+  const icons = [
+    <Icon.Layers size={18}/>,
+    <Icon.Brain size={18}/>,
+    <Icon.Eye size={18}/>,
+    <Icon.Cpu size={18}/>,
+    <Icon.Database size={18}/>,
+    <Icon.Smartphone size={18}/>,
+    <Icon.Cloud size={18}/>,
+    <Icon.Layers size={18}/>,
   ];
   return (
     <section id="capabilities" className="cf-section">
-      <Eyebrow>CAPABILITIES · 08 AREAS</Eyebrow>
-      <h2 className="cf-section-title">What CoderFire does, in plain text.</h2>
-      <p className="cf-section-sub">Eight areas of practice, all under one roof. No layers, no account managers — you talk to the engineer doing the work.</p>
+      <Eyebrow>{t.capabilities.eyebrow}</Eyebrow>
+      <h2 className="cf-section-title">{t.capabilities.title}</h2>
+      <p className="cf-section-sub">{t.capabilities.sub}</p>
       <div className="cf-cap-grid">
-        {groups.map(g => (
+        {t.capabilities.groups.map((g, i) => (
           <div className="cf-cap" key={g.title}>
-            <div className="cf-cap-icon">{g.icon}</div>
+            <div className="cf-cap-icon">{icons[i]}</div>
             <div className="cf-cap-title">{g.title}</div>
             <div className="cf-cap-stack">{g.stack}</div>
-            <p className="cf-cap-blurb" dangerouslySetInnerHTML={{__html: g.blurb}} />
+            <p className="cf-cap-blurb">{g.blurb}</p>
           </div>
         ))}
       </div>
@@ -221,51 +169,30 @@ function CaseRow({ tag, title, metric, metricLabel, desc, stack }) {
       <div className="cf-case-body">
         <h3 className="cf-case-title">{title}</h3>
         <p className="cf-case-desc">{desc}</p>
-        {/* <a className="cf-case-link" href="#" onClick={e=>e.preventDefault()}>Read the case study <Icon.ArrowUpRight size={14}/></a> */}
       </div>
     </article>
   );
 }
 
 function CaseStudies() {
+  const t = useT();
   return (
     <section id="work" className="cf-section cf-section-dark">
-      <Eyebrow color="var(--cf-flare)">CASE STUDIES · SHIPPED</Eyebrow>
-      <h2 className="cf-section-title">Real fires CoderFire has put out.</h2>
-      <p className="cf-section-sub" style={{color:'oklch(0.78 0.012 60)'}}>Four engagements across as many industries. Every metric is from production, not pitch decks.</p>
+      <Eyebrow color="var(--cf-flare)">{t.caseStudies.eyebrow}</Eyebrow>
+      <h2 className="cf-section-title">{t.caseStudies.title}</h2>
+      <p className="cf-section-sub" style={{color:'oklch(0.78 0.012 60)'}}>{t.caseStudies.sub}</p>
       <div className="cf-case-list">
-        <CaseRow
-          tag="AD-TECH · PINTEREST · 4+ YRS"
-          title="Quality Health Scorecard & Business Entity Service"
-          metric="20+"
-          metricLabel="products and service scored, daily"
-          stack="Python · React · SparkSQL · AirFlow · Jenkins"
-          desc="Lead engineering on Pinterest's internal analytics for code and product quality enabling teams to set quarterly goals based on metrics. Also lead on Business Preferences APIs (Business Entity Services)."
-        />
-        <CaseRow
-          tag="AUTOMOTIVE · POLLUX / ACCENTURE · 3 YRS"
-          title="Computer-vision defect inspection on a Tier-1 line."
-          metric="+99%"
-          metricLabel="defect-detection recall"
-          stack="Python · TensorFlow · OpenCV · ZeroMQ · GenICam"
-          desc="Visual inspection with a real-time CV pipeline running on edge GPUs at the cell. Three years technical lead across automotive, aerospatial, and consumer-goods deployments."
-        />
-        <CaseRow
-          tag="CIVIL SUPPLY · COLLABO · 2.5 YRS"
-          title="Geolocation-driven marketplace for civil engineering supply."
-          metric="1k+"
-          metricLabel="Demands connected"
-          stack="C/C++ · Python · Django · Qt · SQLAlchemy · RabbitMQ"
-          desc="Built and operated a SaaS platform connecting product demand with regional suppliers across Brazil. Led architecture, engineering, and some of the sales conversations."
-        />
-        <CaseRow
-          tag="EDTECH · REFATORE · 1 YEAR"
-          title="Programming literacy for 100+ kids in Brazilian public schools."
-          metric="100+"
-          metricLabel="kids reached"
-          stack="Python · JavaScript · Code.org · AWS"
-          desc="Co-founded an early-stage EdTech to bring programming to underserved schools. Designed the curriculum, the platform, and ran the classes. Now operates as a board-level engagement."
-        />
+        {t.caseStudies.cases.map(c => (
+          <CaseRow
+            key={c.tag}
+            tag={c.tag}
+            title={c.title}
+            metric={c.metric}
+            metricLabel={c.metricLabel}
+            stack={c.stack}
+            desc={c.desc}
+          />
+        ))}
       </div>
     </section>
   );
@@ -273,26 +200,17 @@ function CaseStudies() {
 
 // ---------- INDUSTRIES ----------
 function Industries() {
-  const list = [
-    { tag: "AD-TECH", note: "Business platforms, scorecards, preferences APIs" },
-    { tag: "AUTOMOTIVE", note: "Tier-1 inspection, line telemetry, Manufacturing Execution System (MES)" },
-    { tag: "AEROSPATIAL", note: "Industrial control &amp; vision, Manufacturing Execution System (MES)" },
-    { tag: "CONSUMER GOODS", note: "Quality control, demand forecasting" },
-    { tag: "EDTECH", note: "K-12 curriculum, gamified learning" },
-    { tag: "CIVIL SUPPLY CHAIN", note: "Marketplace SaaS, geolocation" },
-    { tag: "GAMING", note: "Embedded slot, bingo, poker (worldwide)" },
-    { tag: "DEVTOOLS", note: "Internal platforms, CI/CD scorecards" },
-  ];
+  const t = useT();
   return (
     <section id="industries" className="cf-section">
-      <Eyebrow>INDUSTRIES · 08</Eyebrow>
-      <h2 className="cf-section-title">On the line, in the cloud, on your phone.</h2>
-      <p className="cf-section-sub">A multi-industry background means CoderFire reads your domain faster. The gotchas tend to look familiar.</p>
+      <Eyebrow>{t.industries.eyebrow}</Eyebrow>
+      <h2 className="cf-section-title">{t.industries.title}</h2>
+      <p className="cf-section-sub">{t.industries.sub}</p>
       <ul className="cf-ind-grid">
-        {list.map(i => (
+        {t.industries.list.map(i => (
           <li className="cf-ind" key={i.tag}>
-            <span className="cf-ind-tag" dangerouslySetInnerHTML={{__html: i.tag}} />
-            <span className="cf-ind-note" dangerouslySetInnerHTML={{__html: i.note}} />
+            <span className="cf-ind-tag">{i.tag}</span>
+            <span className="cf-ind-note">{i.note}</span>
           </li>
         ))}
       </ul>
@@ -304,10 +222,10 @@ function Industries() {
 function HowWeWork() {
   const principles = [
     { n: "01", t: "Senior craftsmanship.", d: "18+ years of production code behind every line CoderFire ships. No junior hands hidden on the invoice." },
-    { n: "02", t: "Predictable cadence.", d: "Bi-weekly demos, weekly written status. You always know what shipped, what didn&rsquo;t, and why." },
+    { n: "02", t: "Predictable cadence.", d: "Bi-weekly demos, weekly written status. You always know what shipped, what didn't, and why." },
     { n: "03", t: "Your repo, your tools.", d: "Work happens in your VCS, your tracker, your Slack. No proprietary lock-in, no hand-off surprise." },
     { n: "04", t: "Remote-first · BRT ±5h.", d: "Brasília time overlaps São Paulo, Lisbon, and NYC the same day. One zone, three meetings, no nights." },
-    { n: "05", t: "Boring on purpose.", d: "We pick the boring stack that works and push back on framework-of-the-month. That&rsquo;s why you hire us." },
+    { n: "05", t: "Boring on purpose.", d: "We pick the boring stack that works and push back on framework-of-the-month. That's why you hire us." },
     { n: "06", t: "Português · English · Español.", d: "Native PT. Proficient EN. Working ES. Same engineer reads your contract, your roadmap, and your standup." },
   ];
   return (
@@ -331,11 +249,12 @@ function HowWeWork() {
 
 // ---------- LEADERSHIP ----------
 function Leadership() {
+  const t = useT();
   return (
     <section id="team" className="cf-section">
-      <Eyebrow>CODERFIRE · PRINCIPAL</Eyebrow>
-      <h2 className="cf-section-title">Who&rsquo;s on the call.</h2>
-      <p className="cf-section-sub">No account managers. No marketplace middlemen. You talk to the engineer who&rsquo;ll architect the work.</p>
+      <Eyebrow>{t.leadership.eyebrow}</Eyebrow>
+      <h2 className="cf-section-title">{t.leadership.title}</h2>
+      <p className="cf-section-sub">{t.leadership.sub}</p>
 
       <div className="cf-lead">
         <div className="cf-lead-card">
@@ -344,12 +263,9 @@ function Leadership() {
             <span className="cf-lead-flame"><Logo size={28} /></span>
           </div>
           <div className="cf-lead-body">
-            <div className="cf-lead-name">Rafael Fernandes</div>
-            <div className="cf-lead-role">Founder &amp; Software Engineer</div>
-            <p className="cf-lead-bio">
-              18+ years building production software across automotive, ad-tech, edtech, and gaming.
-              Currently Software Engineer @ <strong>Pinterest</strong>, formerly Tech Lead at <strong>Pollux/Accenture</strong> (industrial automation and computer vision), co-founder of <strong>Refatore</strong> (EdTech), and <strong>Collabo</strong> (SaaS supply chain).
-            </p>
+            <div className="cf-lead-name">{t.leadership.name}</div>
+            <div className="cf-lead-role">{t.leadership.role}</div>
+            <p className="cf-lead-bio" dangerouslySetInnerHTML={{__html: t.leadership.bio}} />
             <div className="cf-lead-tags">
               <span className="cf-tag">Python</span>
               <span className="cf-tag">React</span>
@@ -367,7 +283,7 @@ function Leadership() {
         </div>
 
         <div className="cf-lead-side">
-          <Eyebrow>CV · HIGHLIGHTS</Eyebrow>
+          <Eyebrow>{t.leadership.cvLabel}</Eyebrow>
           <ul className="cf-cv">
             <li><span className="cf-cv-y">2021&nbsp;—&nbsp;now</span><span><strong>Pinterest</strong> · Software Engineer · Business Platform</span></li>
             <li><span className="cf-cv-y">2021&nbsp;—&nbsp;22</span><span><strong>Refatore</strong> · Co-Founder, then Board Member</span></li>
@@ -390,16 +306,17 @@ function Leadership() {
 
 // ---------- CTA BANNER ----------
 function CtaBanner({ onCta }) {
+  const t = useT();
   return (
     <section className="cf-cta-banner">
       <div className="cf-cta-banner-bg"></div>
       <div className="cf-cta-banner-inner">
         <div>
-          <Eyebrow color="var(--cf-spark)">READY WHEN YOU ARE</Eyebrow>
-          <h2 className="cf-cta-title">Let&rsquo;s scope it out.</h2>
-          <p className="cf-cta-sub">30-minute call. No pitch deck. We&rsquo;ll tell you on the call whether CoderFire is a fit — and if we&rsquo;re not, we&rsquo;ll point you to who is.</p>
+          <Eyebrow color="var(--cf-spark)">{t.ctaBanner.eyebrow}</Eyebrow>
+          <h2 className="cf-cta-title">{t.ctaBanner.title}</h2>
+          <p className="cf-cta-sub">{t.ctaBanner.sub}</p>
         </div>
-        <PixelButton onClick={onCta}>BOOK&nbsp;A&nbsp;CALL</PixelButton>
+        <PixelButton onClick={onCta}>{t.ctaBanner.button}</PixelButton>
       </div>
     </section>
   );

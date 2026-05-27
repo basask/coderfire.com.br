@@ -397,6 +397,24 @@ strong { font-weight: 700; }
 .cf-field-error { font-size: 13px; color: var(--destructive, #c62828); margin: 0; line-height: 1.4; }
 .cf-field textarea { resize: vertical; font-family: var(--font-sans); }
 
+/* =============== LANG TOGGLE =============== */
+.cf-lang-toggle {
+  display: flex; align-items: center; gap: 2px;
+  background: var(--muted); border: 1px solid var(--border);
+  border-radius: 8px; padding: 3px;
+}
+.cf-lang-btn {
+  background: transparent; border: none;
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+  color: var(--muted-foreground); padding: 5px 8px; border-radius: 5px;
+  cursor: pointer; transition: background 120ms, color 120ms;
+}
+.cf-lang-btn:hover { color: var(--foreground); }
+.cf-lang-btn-active {
+  background: var(--card); color: var(--cf-blaze);
+  box-shadow: 0 1px 3px oklch(0.18 0.02 30 / 0.12);
+}
+
 /* =============== RESPONSIVE =============== */
 @media (max-width: 1100px) {
   .cf-cap-grid { grid-template-columns: repeat(2, 1fr); }
